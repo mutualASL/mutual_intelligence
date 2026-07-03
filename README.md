@@ -52,8 +52,164 @@ Model: "sequential"
 │ dropout_3 (Dropout)             │ (None, 64)             │             0 │
 │ dense_1 (Dense)                 │ (None, 26)             │         1,690 │
 └─────────────────────────────────┴────────────────────────┴───────────────┘
- Total params:        2,585,754
- Trainable params:    2,585,402
- Non-trainable params:      352
+ Total params: 2,585,754 (9.86 MB)
+ Trainable params: 2,585,402 (9.86 MB)
+ Non-trainable params: 352 (1.38 KB)
 ```
+**Latest Model Synopsis**: July 3, 2026
+**Version 3:** v3piroiasl_landmark_model.keras
+
+1. Summary: The v3 landmark classifier was retrained on the expanded skeleton-render dataset and reached 99.13% validation accuracy, converging in just 6 epochs before the convergence callback stopped training. Every one of the 26 letters scored ≥ 97% recall, with 10 letters at or effectively at 100%. The model has 2.59M trainable parameters (9.86 MB of weights) and is deployment-ready for the Raspberry Pi 5 wearable with no pipeline changes.
+
+This run incorporates the freshly recollected data for C, G, H, I, J, M, N, O, T, U, V, W, bringing the dataset to nearly 96K images — roughly an order of magnitude larger than earlier iterations.
+
+2. Dataset: Class sizes are uneven — recollected letters such as M (1,495), C (1,257), and O (1,170) carry roughly 2–3× the samples of the smallest classes. This was compensated at training time with inverse-frequency class weights, and the balanced macro-average F1 of 0.99 confirms no class was neglected.
+<img width="473" height="368" alt="Screenshot 2026-07-03 at 10 25 30 PM" src="https://github.com/user-attachments/assets/b3f16918-69c1-4253-ae68-575b1a68832e" />
+
+4. Architecture: compact VGG-style CNN — three Conv2D blocks (16 → 32 → 64 filters, each Conv → BatchNorm → MaxPool → Dropout), then Flatten → Dense(64) → BatchNorm → Dropout(0.5) → Dense(26, softmax).
+
+5. The learning rate never needed reduction (2e-4 throughout). Validation accuracy exceeded training accuracy in every epoch — expected behavior, since training accuracy is measured with dropout active while validation runs with it disabled. Validation loss decreased monotonically across all six epochs, indicating no overfitting at the stopping point. Convergence in six epochs on a 26-class problem reflects the strength of the normalized skeleton representation: with position, scale, rotation, lighting, and background variance removed before the CNN ever sees the data, the remaining learning problem is nearly pure handshape discrimination.
+
+```text
+Epoch 1/100
+1198/1198 ━━━━━━━━━━━━━━━━━━━━ 0s 769ms/step - accuracy: 0.8114 - loss: 0.5301
+Epoch 1: val_accuracy improved from -inf to 0.96963, saving model to best_landmark_model.keras
+1198/1198 ━━━━━━━━━━━━━━━━━━━━ 963s 802ms/step - accuracy: 0.8114 - loss: 0.5300 - val_accuracy: 0.9696 - val_loss: 0.2011 - learning_rate: 2.0000e-04
+Epoch 2/100
+1198/1198 ━━━━━━━━━━━━━━━━━━━━ 0s 1s/step - accuracy: 0.9536 - loss: 0.1415
+Epoch 2: val_accuracy improved from 0.96963 to 0.98090, saving model to best_landmark_model.keras
+1198/1198 ━━━━━━━━━━━━━━━━━━━━ 1822s 2s/step - accuracy: 0.9536 - loss: 0.1415 - val_accuracy: 0.9809 - val_loss: 0.1020 - learning_rate: 2.0000e-04
+Epoch 3/100
+1198/1198 ━━━━━━━━━━━━━━━━━━━━ 0s 2s/step - accuracy: 0.9671 - loss: 0.0922
+Epoch 3: val_accuracy improved from 0.98090 to 0.98758, saving model to best_landmark_model.keras
+1198/1198 ━━━━━━━━━━━━━━━━━━━━ 1930s 2s/step - accuracy: 0.9671 - loss: 0.0922 - val_accuracy: 0.9876 - val_loss: 0.0564 - learning_rate: 2.0000e-04
+Epoch 4/100
+1198/1198 ━━━━━━━━━━━━━━━━━━━━ 0s 807ms/step - accuracy: 0.9753 - loss: 0.0666
+Epoch 4: val_accuracy improved from 0.98758 to 0.99003, saving model to best_landmark_model.keras
+
+Convergence Condition Met: Epoch 1/3
+1198/1198 ━━━━━━━━━━━━━━━━━━━━ 1003s 837ms/step - accuracy: 0.9753 - loss: 0.0666 - val_accuracy: 0.9900 - val_loss: 0.0448 - learning_rate: 2.0000e-04
+Epoch 5/100
+1198/1198 ━━━━━━━━━━━━━━━━━━━━ 0s 4s/step - accuracy: 0.9804 - loss: 0.0523
+Epoch 5: val_accuracy improved from 0.99003 to 0.99128, saving model to best_landmark_model.keras
+
+Convergence Condition Met: Epoch 2/3
+1198/1198 ━━━━━━━━━━━━━━━━━━━━ 4525s 4s/step - accuracy: 0.9804 - loss: 0.0523 - val_accuracy: 0.9913 - val_loss: 0.0438 - learning_rate: 2.0000e-04
+Epoch 6/100
+1198/1198 ━━━━━━━━━━━━━━━━━━━━ 0s 4s/step - accuracy: 0.9818 - loss: 0.0464
+Epoch 6: val_accuracy did not improve from 0.99128
+
+Convergence Condition Met: Epoch 3/3
+
+Training stopped: Accuracy >= 97.0% for 3 epochs.
+1198/1198 ━━━━━━━━━━━━━━━━━━━━ 4697s 4s/step - accuracy: 0.9818 - loss: 0.0464 - val_accuracy: 0.9905 - val_loss: 0.0406 - learning_rate: 2.0000e-04
+Restoring model weights from the end of the best epoch: 6.
+
+--- Evaluating Best Model ---
+
+Final Validation Accuracy: 99.13%
+```
+6. Trained Results:
+``` text
+              precision    recall  f1-score   support
+
+           A       0.99      1.00      0.99       510
+           B       0.97      0.99      0.98       507
+           C       0.99      1.00      0.99      1257
+           D       1.00      0.99      0.99       523
+           E       1.00      0.99      1.00       509
+           F       1.00      1.00      1.00       527
+           G       1.00      1.00      1.00       801
+           H       0.98      1.00      0.99       806
+           I       1.00      0.98      0.99       805
+           J       0.97      1.00      0.98       766
+           K       1.00      0.98      0.99       551
+           L       1.00      0.99      0.99       566
+           M       0.99      0.98      0.98      1495
+           N       1.00      0.99      1.00       806
+           O       0.99      1.00      1.00      1170
+           P       1.00      0.99      0.99       669
+           Q       0.98      0.99      0.99       736
+           R       0.99      1.00      1.00       543
+           S       0.98      1.00      0.99       553
+           T       1.00      0.99      1.00       742
+           U       1.00      0.98      0.99       702
+           V       1.00      0.99      1.00       842
+           W       0.98      0.99      0.99       762
+           X       1.00      0.99      1.00       704
+           Y       0.99      1.00      0.99       564
+           Z       1.00      0.97      0.98       746
+
+    accuracy                           0.99     19162
+   macro avg       0.99      0.99      0.99     19162
+weighted avg       0.99      0.99      0.99     19162
+
+
+--- Per-Letter Accuracy ---
+Accuracy for A: 1.00 (508/510)
+Accuracy for B: 0.99 (503/507)
+Accuracy for C: 1.00 (1252/1257)
+Accuracy for D: 0.99 (519/523)
+Accuracy for E: 0.99 (506/509)
+Accuracy for F: 1.00 (525/527)
+Accuracy for G: 1.00 (798/801)
+Accuracy for H: 1.00 (803/806)
+Accuracy for I: 0.98 (786/805)
+Accuracy for J: 1.00 (764/766)
+Accuracy for K: 0.98 (541/551)
+Accuracy for L: 0.99 (561/566)
+Accuracy for M: 0.98 (1461/1495)
+Accuracy for N: 0.99 (799/806)
+Accuracy for O: 1.00 (1170/1170)
+Accuracy for P: 0.99 (664/669)
+Accuracy for Q: 0.99 (731/736)
+Accuracy for R: 1.00 (542/543)
+Accuracy for S: 1.00 (553/553)
+Accuracy for T: 0.99 (737/742)
+Accuracy for U: 0.98 (691/702)
+Accuracy for V: 0.99 (837/842)
+Accuracy for W: 0.99 (758/762)
+Accuracy for X: 0.99 (699/704)
+Accuracy for Y: 1.00 (564/564)
+Accuracy for Z: 0.97 (723/746)
+```
+Residual errors are small and concentrated where ASL handshapes are genuinely similar or motion-based: Z (0.97) and J (1.00 recall, 0.97 precision) are the two motion letters, captured as static keyframes. Their intra-class variance is inherently the highest in the dataset — different frames of the same stroke look different — so a slightly lower score here is structural, not a data-quality problem. Z's 23 misses are the largest single error group in the run.
+
+The closed-fist hand poses (M, N, S, T, E) held up well: S and E is effectively perfect, M at 0.98 with 34 misses out of 1,495 (also the largest class, so its error count looks bigger than its error rate). The recollected M/N/T data appears to have paid off.
+
+I (0.98, 19 misses) and U (0.98, 11 misses) are thin-profile shapes (single and paired extended fingers) that can lose detail in the skeleton render at certain wrist angles. K (0.98) shares the paired-finger geometry with U/V. No letter fell below 97%, and no systematic cross-class collapse appears in the confusion matrix — errors are diffuse rather than clustered around one bad pairing.
+
+7. Parameter Reflection: 
+We can expect live translation to have an accuracy rate somewhat lower than the benchmark results, as live interpretation involves environmental disturbances from the surroundings and introduces more unpredictable and less favorable conditions. **Moving forward, we hope to expand our data pool further by having a variety of signers participate in data collection.**
+
+<table align="center">
+  <tr>
+    <td align="center">
+      <img width="2100" height="750" alt="training_curves" src="https://github.com/user-attachments/assets/7aa09fee-a20b-4e08-93d2-64b39b885b5f" />
+    </td>
+    <td align="center">
+      <img width="2100" height="750" alt="per_letter_accuracy" src="https://github.com/user-attachments/assets/ef29a49f-fdc8-4faa-8f37-e22612fe9ac6" />
+    </td>
+  </tr>
+  <tr>
+    <td align="center"><sub>Training Curves</sub></td>
+    <td align="center"><sub>Per-Letter Accuracy</sub></td>
+  </tr>
+</table>
+<table align="center">
+  <tr>
+    <td align="center">
+      <img width="1200" height="1000" alt="confusion_matrix_normalized" src="https://github.com/user-attachments/assets/2649e25f-9d5f-4f74-bfd3-595e6be7cc3b" />
+    </td>
+    <td align="center">
+      <img width="1200" height="1000" alt="confusion_matrix" src="https://github.com/user-attachments/assets/b41a17df-5d66-456c-ac87-dafd70b5b947" />
+    </td>
+  </tr>
+  <tr>
+    <td align="center"><sub>Confusion Matrix Normalized</sub></td>
+    <td align="center"><sub>Confusion Matrix</sub></td>
+  </tr>
+</table>
+
+
 
