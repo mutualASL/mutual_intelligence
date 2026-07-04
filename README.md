@@ -72,7 +72,6 @@ Model: "sequential"
 This run incorporates the freshly recollected data for C, G, H, I, J, M, N, O, T, U, V, W, bringing the dataset to nearly 96K images — roughly an order of magnitude larger than earlier iterations.
 
 2. Dataset: Class sizes are uneven — recollected letters such as M (1,495), C (1,257), and O (1,170) carry roughly 2–3× the samples of the smallest classes. This was compensated at training time with inverse-frequency class weights, and the balanced macro-average F1 of 0.99 confirms no class was neglected.
-<img width="473" height="368" alt="Screenshot 2026-07-03 at 10 25 30 PM" src="https://github.com/user-attachments/assets/b3f16918-69c1-4253-ae68-575b1a68832e" />
 
 4. Architecture: compact VGG-style CNN — three Conv2D blocks (16 → 32 → 64 filters, each Conv → BatchNorm → MaxPool → Dropout), then Flatten → Dense(64) → BatchNorm → Dropout(0.5) → Dense(26, softmax).
 
