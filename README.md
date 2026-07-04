@@ -1,7 +1,15 @@
 # Mutual - ASL Live-Fingerspelling Classification and LLM Processing
+
+## Prior Acknowledgement: 
+Our interpretation pipeline attempts to interpret real-time ASL fingerspelling for simple exchanges. We acknowledge that ASL is a dynamic and interpretive language that necessitates, ultimately, human-to-human communication, and that our design fails to account for facial involvement and the "feeling" aspect of the language. We also recognize that fingerspelling is only a portion of the language that assists in specifying proper nouns, technical terms, and words that have not yet been standardized. 
+
+Our primary objective for this project, alongside our wearable development, is in hopes of encouraging the hearing community to take a more proactive stance in branching out to the Deaf community by educating themselves on ASL. While we certainly hope our wearable can help Deaf individuals in very simple exchanges with hearing individuals, we value more that the interpreter inspires hearing individuals to learn fingerspelling and the shortcomings of computer vision "gadgets" in application to a deeply complex, expressive language. We also hope to establish a relationship with Brookline Deaf organizations to further our communal engagements. 
+
+## Overview: 
 **Mutual**, a student non-profit centered in Brookline, Massachusetts, is dedicated to bridging communication between the Deaf community and non-signers. This repository features our ASl fingerspelling hand pose recognition pipeline: a hand-pose landmark classification model paired with a large-language-model processing layer that turns raw letter predictions into fluent, readable text. 
 
 Our most recent updates and packages, including **piroitranslation.py**, **asl_settings.py**, **v2piroiasl_landmark_model.keras** are compatible on the Raspberry Pi OS ecosystem as we develop a wearable designed for live ASl fingerspelling interpretation. This pipeline combined Mediapipe for hand detection and 21-point landmark extraction, Tensorflow/Keras for a trained classification model, and an LLM post-processing stage that forms grammatical sentences from strings of detected hand signs. Our program runs on Raspberry Pi, translating fingerspelling input into spoken and on-screen English in real time. 
+
 
 ## Methodology
 ### 1. Data Collection and Preprocessing:
