@@ -3,6 +3,7 @@
 Note: This is our work-in-progress repository that features our much older iterations of experimental models and datasets. The project began at the end of 2024 and has evolved into full development. 
 
 You can find our nearly full-fledged project repository [here](https://github.com/mutualASL/mutual-ProjectLink).
+
 <img width="420" height="218" alt="Screenshot 2026-07-06 at 12 50 39 AM" src="https://github.com/user-attachments/assets/9a189a9e-53ac-4c55-9580-6232f99a405c" />
 
 
